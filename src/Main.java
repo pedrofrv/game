@@ -1,3 +1,8 @@
+import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +14,9 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.opengl.TextureImpl;
 
 
 public class Main {
@@ -21,15 +29,24 @@ public class Main {
 	
 	private SoundManager soundManager; 
 	private List<Entity> entities = new ArrayList<Entity>();
-	private Player player = new Player();
+	private Player player = new Player(entities);
 
 	public Main() {
 		//soundManager = new SoundManager();
 		//soundManager.addSound("fallbig.wav");
-		entities.add(player);
+		/*entities.add(player);
 		entities.add(new Wall(50,0));
 		entities.add(new Wall(50,50));
-		entities.add(new Wall(100,50));
+		entities.add(new Wall(50,100));
+		entities.add(new Wall(50,150));
+		entities.add(new Wall(50,200));
+		entities.add(new Wall(50,250));
+		entities.add(new Wall(0,350));
+		entities.add(new Wall(50,350));
+		entities.add(new Wall(100,350));
+		entities.add(new Wall(150,350));
+		entities.add(new Wall(150,300));*/
+		buildMap();
 	}
 	
 	public void start(){
@@ -43,8 +60,11 @@ public class Main {
 		
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		GL11.glOrtho(0, 800, 600, 0, 1, -1);
+		GL11.glOrtho(0, 1000, 600, 0, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		
+		
+		
 		
 		getDelta();
 		lastFPS = getTime();
@@ -55,6 +75,7 @@ public class Main {
 			updateFPS();
 			
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
+			
 			
 			
 			draw();
@@ -118,9 +139,19 @@ public class Main {
 	}
 	
 	private void draw() {
+		
+		GL11.glColor3f(0.5f,0.5f,0.5f);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glVertex2f(0,0);
+		GL11.glVertex2f(800,0);
+		GL11.glVertex2f(800,600);
+		GL11.glVertex2f(0,600);
+		GL11.glEnd();
+		
 		for (Entity entity : entities) {
 			entity.draw();
 		}
+		
 	}
 	
 	/**
@@ -151,6 +182,41 @@ public class Main {
 		}
 		fps++;
 	}
+	
+	private void buildMap() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("map.txt"));
+			String line = null;
+			int y=0;
+			while((line = reader.readLine())!=null) {
+				for (int i = 0; i < line.length(); i++) {
+					char c = line.charAt(i);
+					if(c=='#') {
+						entities.add(new Wall(i*Entity.SIZE,y*Entity.SIZE));
+					}
+					if(c=='@') {
+						player.setPosX(i*Entity.SIZE);
+						player.setPosY(y*Entity.SIZE);
+						entities.add(player);
+					}
+					if(c=='*') {
+						entities.add(new Loot(i*Entity.SIZE,y*Entity.SIZE));
+					}
+					if(c=='%') {
+						entities.add(new Exit(i*Entity.SIZE,y*Entity.SIZE));
+					}
+				}
+				y++;
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * @param args
 	 */

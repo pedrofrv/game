@@ -1,3 +1,5 @@
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 
@@ -7,7 +9,7 @@ public abstract class Entity {
 	protected int posY;
 	protected static final int SIZE = 50;
 	protected static final int MOVEMENT = 50;
-
+	
 	public void setPosX(int posX) {
 		this.posX = posX;
 	}
@@ -25,4 +27,6 @@ public abstract class Entity {
 	}
 	
 	public abstract void draw();
+	
+	public abstract void collide(Player p);
 }
